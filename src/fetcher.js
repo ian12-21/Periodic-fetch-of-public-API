@@ -18,7 +18,7 @@ export async function fetchOnce() {
     }
 
     const json = await resp.json();
-    const record = mapCoindeskResponse(json, startedAt);
+    const record = mapResponse(json, startedAt);
     validateRecord(record);
     appendRecord(record);
     logMessage(`OK ${record.symbol} ${record.price}`);
@@ -28,15 +28,19 @@ export async function fetchOnce() {
 }
 
 // mapira odgovor API-ja u standardni zapis
-function mapCoindeskResponse(json, timestamp) {
-  // primjer za Coindesk; ako mijenjaš API, prilagodi ovo
-  const price = json?.bpi?.EUR?.rate_float;
+function mapResponse(json, timestamp) {
+  // CoinGecko oblik:
+  // { "bitcoin": { "eur": 79233 } }
+  const priceEur = json?.bitcoin?.eur;
   return {
     timestamp: timestamp.toISOString(),
+    source: 'coingecko',
     symbol: 'BTC',
-    price
+    currency: 'EUR',
+    price: priceEur
   };
 }
+
 
 // validira strukturu zapisa
 function validateRecord(record) {

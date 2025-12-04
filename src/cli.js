@@ -54,8 +54,10 @@ function parseCsvLine(line) {
   const parts = line.split(',');
   return {
     timestamp: parts[0].replace(/"/g, ''),
-    symbol: parts[1].replace(/"/g, ''),
-    price: Number(parts[2])
+    source: parts[1].replace(/"/g, ''),
+    symbol: parts[2].replace(/"/g, ''),
+    currency: parts[3].replace(/"/g, ''),
+    price: Number(parts[4])
   };
 }
 
@@ -81,9 +83,13 @@ function main() {
   console.table(
     all.map((r) => ({
       timestamp: r.timestamp,
+      source: r.source,
       symbol: r.symbol,
+      currency: r.currency,
       price: r.price
     }))
   );
   // opcional
 }
+
+main();

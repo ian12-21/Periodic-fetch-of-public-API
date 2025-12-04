@@ -31,9 +31,8 @@ export function appendRecord(record) {
 
 // formatira zapis kao CSV liniju
 function toCsvLine(record) {
-  // vrlo jednostavan CSV: timestamp,symbol,price
-  const { timestamp, symbol, price } = record;
-  return `"${timestamp}","${symbol}",${price}`;
+  const { timestamp, source, symbol, currency, price } = record;
+  return `"${timestamp}","${source}","${symbol}","${currency}",${price}`;
 }
 
 // zapisuje poruku u log datoteku
