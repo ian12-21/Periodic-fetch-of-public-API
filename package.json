@@ -1,0 +1,15 @@
+{
+  "name": "prakticni-seminar",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "src/scheduler.js",
+  "scripts": {
+    "start": "node src/scheduler.js",
+    "cli": "node src/cli.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.6.1",
+    "node-fetch": "^3.3.2",
+    "yargs": "^17.7.2"
+  }
+}
