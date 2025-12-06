@@ -3,6 +3,7 @@ import path from 'path';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import { config } from './config.js';
+import { fetchOnce } from './fetcher.js';
 
 // parsiraj argumente naredbenog retka
 const argv = yargs(hideBin(process.argv))
@@ -16,7 +17,16 @@ const argv = yargs(hideBin(process.argv))
   })
   .option('symbol', {
     type: 'string',
-    describe: 'Simbol (npr. BTC)'
+    describe: 'Simbol (npr. bitcoin, ethereum)'
+  })
+  .option('currency', {
+    type: 'string',
+    describe: 'Valuta (npr. eur, usd, gbp)'
+  })
+  .option('fetch', {
+    type: 'boolean',
+    default: false,
+    describe: 'Dohvati podatke s API-ja umjesto čitanja iz datoteke'
   })
   .option('out', {
     type: 'string',
@@ -61,17 +71,38 @@ function parseCsvLine(line) {
   };
 }
 
-function main() {
-  const from = argv.from || new Date().toISOString().slice(0, 10);
-  const to = argv.to || from;
+async function main() {
+  const symbol = argv.symbol || 'bitcoin';
+  const currency = argv.currency || 'eur';
 
   let all = [];
-  for (const d of dateRange(from, to)) {
-    all = all.concat(readRecordsForDate(d));
-  }
 
-  if (argv.symbol) {
-    all = all.filter((r) => r.symbol === argv.symbol);
+  if (argv.fetch) {
+    // Dohvati podatke s API-ja
+    console.log(`Dohvaćanje podataka za ${symbol} u ${currency.toUpperCase()}...`);
+    await fetchOnce(symbol, currency);
+    const today = new Date().toISOString().slice(0, 10);
+    all = readRecordsForDate(today);
+    // Filtriraj samo zapise koji su upravo dohvaćeni
+    const symbolUpper = symbol.slice(0, 3).toUpperCase();
+    all = all.filter((r) => r.symbol === symbolUpper && r.currency === currency.toUpperCase());
+  } else {
+    // Čitaj iz datoteka
+    const from = argv.from || new Date().toISOString().slice(0, 10);
+    const to = argv.to || from;
+
+    for (const d of dateRange(from, to)) {
+      all = all.concat(readRecordsForDate(d));
+    }
+    
+    // Primijeni filtere samo kad čitamo iz datoteka
+    if (argv.symbol) {
+      all = all.filter((r) => r.symbol === argv.symbol);
+    }
+
+    if (argv.currency) {
+      all = all.filter((r) => r.currency === argv.currency.toUpperCase());
+    }
   }
 
   if (all.length === 0) {

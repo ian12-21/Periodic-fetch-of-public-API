@@ -3,14 +3,17 @@ import { config } from './config.js';
 import { appendRecord, logMessage } from './storage.js';
 
 // obavlja jedan dohvat podataka s API-ja i sprema ga
-export async function fetchOnce() {
+export async function fetchOnce(symbol = 'bitcoin', currency = 'eur') {
   const startedAt = new Date();
   try {
+    // konstruiraj dinamički API URL sa simbolom i valutom
+    const apiUrl = `https://api.coingecko.com/api/v3/simple/price?ids=${symbol}&vs_currencies=${currency}`;
+    
     // postavi timeout za fetch
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 8000);
 
-    const resp = await fetch(config.apiUrl, { signal: controller.signal });
+    const resp = await fetch(apiUrl, { signal: controller.signal });
     clearTimeout(timeout);
 
     if (!resp.ok) {
@@ -18,26 +21,27 @@ export async function fetchOnce() {
     }
 
     const json = await resp.json();
-    const record = mapResponse(json, startedAt);
+    const record = mapResponse(json, startedAt, symbol, currency);
     validateRecord(record);
     appendRecord(record);
-    logMessage(`OK ${record.symbol} ${record.price}`);
+    logMessage(`OK ${record.symbol} ${record.currency} ${record.price}`);
   } catch (err) {
     logMessage(`ERROR fetchOnce: ${err.message}`);
   }
 }
 
 // mapira odgovor API-ja u standardni zapis
-function mapResponse(json, timestamp) {
+function mapResponse(json, timestamp, symbol = 'bitcoin', currency = 'eur') {
   // CoinGecko oblik:
   // { "bitcoin": { "eur": 79233 } }
-  const priceEur = json?.bitcoin?.eur;
+  const price = json?.[symbol]?.[currency.toLowerCase()];
+  const symbolUpper = symbol.slice(0, 3).toUpperCase(); // bitcoin -> BTC
   return {
     timestamp: timestamp.toISOString(),
     source: 'coingecko',
-    symbol: 'BTC',
-    currency: 'EUR',
-    price: priceEur
+    symbol: symbolUpper,
+    currency: currency.toUpperCase(),
+    price: price
   };
 }
 
