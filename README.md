@@ -28,6 +28,19 @@ npm start
 - Sve dohvate i greške će biti zabilježeni u `logs/app.log`
 - Podaci se sprema u `data/YYYY-MM-DD.csv` datoteke
 
+## Kako promijeniti par za dohvat (fetchOnce)
+
+Ako želiš dohvaćati **drugi par** (drugu kriptovalutu ili drugu valutu), potrebno je promijeniti vrijednosti `symbol` i `currency` koje se prosljeđuju funkciji `fetchOnce` u `fetcher.js` (jer se API URL gradi iz ta dva parametra). [file:36]
+
+- `symbol` = CoinGecko id kriptovalute (npr. `bitcoin`, `ethereum`, `solana`) [file:36]
+- `currency` = valuta u kojoj želiš cijenu (npr. `eur`, `usd`, `gbp`) [file:36]
+
+Primjer: umjesto default para BTC/EUR, postavi ETH/USD promjenom default vrijednosti:
+
+```js
+export async function fetchOnce(symbol = 'ethereum', currency = 'usd') {
+
+
 ### 2. CLI Filtriranje i Dohvat
 
 Nakon što se skupi par snimaka, pokreni CLI za pregled podataka:
