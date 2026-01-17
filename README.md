@@ -39,7 +39,7 @@ Primjer: umjesto default para BTC/EUR, postavi ETH/USD promjenom default vrijedn
 
 ```js
 export async function fetchOnce(symbol = 'ethereum', currency = 'usd') {
-
+```
 
 ### 2. CLI Filtriranje i Dohvat
 
